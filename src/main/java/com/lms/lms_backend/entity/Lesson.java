@@ -1,20 +1,19 @@
 package com.example.lms.model;
 
 import jakarta.persistence.*;
-import java.util.List;
 
 @Entity
-public class Course {
+public class Lesson {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String title;
-    private String description;
+    private String content;
 
-    @OneToMany(mappedBy = "course", cascade = CascadeType.ALL)
-    private List<Lesson> lessons;
+    @ManyToOne
+    @JoinColumn(name = "course_id")
+    private Course course;
 
-  
 }
