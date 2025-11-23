@@ -1,5 +1,7 @@
 package com.lms.lms_backend.config;
 
+import java.util.Arrays;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -11,8 +13,6 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.Arrays;
-
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
@@ -23,9 +23,11 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(authz -> authz
-                .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers("/api/courses/**").permitAll()
-                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                .requestMatchers("/auth/**").permitAll()
+                .requestMatchers("/courses/**").permitAll()
+                .requestMatchers("/quizzes/**").permitAll()
+                .requestMatchers("/ai/**").permitAll()
+                .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/api-docs/**").permitAll()
                 .anyRequest().authenticated()
             );
         return http.build();

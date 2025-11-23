@@ -1,17 +1,23 @@
 package com.lms.lms_backend.controller;
 
-import com.lms.lms_backend.dto.UserDTO;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.lms.lms_backend.dto.LoginRequest;
+import com.lms.lms_backend.dto.RegistrationRequest;
+import com.lms.lms_backend.dto.UserDTO;
 import com.lms.lms_backend.service.UserService;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/auth")
 @Tag(name = "Authentication", description = "APIs for user authentication and registration")
 public class AuthController {
 
@@ -20,8 +26,8 @@ public class AuthController {
 
     @PostMapping("/register")
     @Operation(summary = "Register a new user", description = "Creates a new student account")
-    public ResponseEntity<UserDTO> register(@Valid @RequestBody UserDTO userDTO) {
-        UserDTO registeredUser = userService.registerUser(userDTO);
+    public ResponseEntity<UserDTO> register(@Valid @RequestBody RegistrationRequest registrationRequest) {
+        UserDTO registeredUser = userService.registerUser(registrationRequest);
         return ResponseEntity.ok(registeredUser);
     }
 

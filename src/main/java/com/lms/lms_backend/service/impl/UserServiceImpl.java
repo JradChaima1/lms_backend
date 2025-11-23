@@ -3,11 +3,10 @@ package com.lms.lms_backend.service.impl;
 import com.lms.lms_backend.dto.UserDTO;
 import com.lms.lms_backend.dto.LoginRequest;
 import com.lms.lms_backend.dto.ProgressDTO;
+import com.lms.lms_backend.dto.RegistrationRequest;
 import com.lms.lms_backend.entity.User;
 import com.lms.lms_backend.entity.Enrollment;
 import com.lms.lms_backend.entity.Course;
-import com.lms.lms_backend.entity.Lesson;
-import com.lms.lms_backend.entity.Quiz;
 import com.lms.lms_backend.repository.UserRepository;
 import com.lms.lms_backend.repository.EnrollmentRepository;
 import com.lms.lms_backend.repository.CourseRepository;
@@ -41,22 +40,20 @@ public class UserServiceImpl implements UserService {
     private PasswordEncoder passwordEncoder;
 
     @Override
-    public UserDTO registerUser(UserDTO userDTO) {
-        // Check if user already exists
-        if (userRepository.existsByEmail(userDTO.getEmail())) {
-            throw new UserAlreadyExistsException("User with email " + userDTO.getEmail() + " already exists");
+    public UserDTO registerUser(RegistrationRequest registrationRequest) {
+
+        if (userRepository.existsByEmail(registrationRequest.getEmail())) {
+            throw new UserAlreadyExistsException("User with email " + registrationRequest.getEmail() + " already exists");
         }
 
-        // Create new user entity
+    
         User user = new User();
-        user.setName(userDTO.getName());
-        user.setEmail(userDTO.getEmail());
-        user.setPassword(passwordEncoder.encode(userDTO.getPassword())); // Encode password
-        user.setRole("STUDENT"); // Default role
+        user.setName(registrationRequest.getName());
+        user.setEmail(registrationRequest.getEmail());
+        user.setPassword(passwordEncoder.encode(registrationRequest.getPassword()));
+        user.setRole(registrationRequest.getRole() != null ? registrationRequest.getRole() : "STUDENT");
 
         User savedUser = userRepository.save(user);
-
-        // Convert to DTO and return
         return convertToDTO(savedUser);
     }
 
@@ -65,7 +62,7 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findByEmail(loginRequest.getEmail())
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + loginRequest.getEmail()));
 
-        // Verify password
+      
         if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
             throw new RuntimeException("Invalid password");
         }
@@ -100,7 +97,7 @@ public class UserServiceImpl implements UserService {
         Course course = courseRepository.findById(courseId)
                 .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + courseId));
 
-        // Check if already enrolled
+        
         if (enrollmentRepository.findByUserIdAndCourseId(userId, courseId).isPresent()) {
             throw new RuntimeException("User already enrolled in this course");
         }
@@ -121,7 +118,7 @@ public class UserServiceImpl implements UserService {
     private ProgressDTO convertToProgressDTO(Enrollment enrollment) {
         Course course = enrollment.getCourse();
         
-        // Calculate progress metrics
+   
         int totalLessons = course.getLessons().size();
         int completedLessons = calculateCompletedLessons(enrollment.getUser(), course);
         double progressPercentage = totalLessons > 0 ? (double) completedLessons / totalLessons * 100 : 0;
@@ -137,7 +134,7 @@ public class UserServiceImpl implements UserService {
     }
 
     private int calculateCompletedLessons(User user, Course course) {
-        // A lesson is considered completed if the user has taken its quiz
+    
         return (int) course.getLessons().stream()
                 .filter(lesson -> lesson.getQuiz() != null)
                 .filter(lesson -> quizRepository.findByUserIdAndLessonId(user.getId(), lesson.getId()).size() > 0)
