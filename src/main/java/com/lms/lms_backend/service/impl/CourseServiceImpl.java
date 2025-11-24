@@ -1,19 +1,20 @@
 package com.lms.lms_backend.service.impl;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.lms.lms_backend.dto.CourseDTO;
 import com.lms.lms_backend.dto.LessonDTO;
 import com.lms.lms_backend.entity.Course;
 import com.lms.lms_backend.entity.Lesson;
-import com.lms.lms_backend.repository.CourseRepository;
-import com.lms.lms_backend.repository.LessonRepository;
-import com.lms.lms_backend.repository.EnrollmentRepository;
-import com.lms.lms_backend.service.CourseService;
 import com.lms.lms_backend.exception.ResourceNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.stream.Collectors;
+import com.lms.lms_backend.repository.CourseRepository;
+import com.lms.lms_backend.repository.EnrollmentRepository;
+import com.lms.lms_backend.repository.LessonRepository;
+import com.lms.lms_backend.service.CourseService;
 
 @Service
 public class CourseServiceImpl implements CourseService {
@@ -64,7 +65,80 @@ public class CourseServiceImpl implements CourseService {
                 .orElseThrow(() -> new ResourceNotFoundException("Lesson not found with id: " + lessonId));
         return convertToDTO(lesson);
     }
+   
+@Override
+public CourseDTO createCourse(CourseDTO courseDTO) {
+    Course course = new Course();
+    course.setTitle(courseDTO.getTitle());
+    course.setDescription(courseDTO.getDescription());
+    course.setCategory(courseDTO.getCategory());
+    course.setDifficulty(courseDTO.getDifficulty());
+    course.setDuration(courseDTO.getDuration());
+    
+    Course savedCourse = courseRepository.save(course);
+    return convertToDTO(savedCourse);
+}
 
+@Override
+public CourseDTO updateCourse(Long courseId, CourseDTO courseDTO) {
+    Course course = courseRepository.findById(courseId)
+            .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + courseId));
+    
+    course.setTitle(courseDTO.getTitle());
+    course.setDescription(courseDTO.getDescription());
+    course.setCategory(courseDTO.getCategory());
+    course.setDifficulty(courseDTO.getDifficulty());
+    course.setDuration(courseDTO.getDuration());
+    
+    Course updatedCourse = courseRepository.save(course);
+    return convertToDTO(updatedCourse);
+}
+
+@Override
+public void deleteCourse(Long courseId) {
+    Course course = courseRepository.findById(courseId)
+            .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + courseId));
+    courseRepository.delete(course);
+}
+
+@Override
+public LessonDTO createLesson(Long courseId, LessonDTO lessonDTO) {
+    Course course = courseRepository.findById(courseId)
+            .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + courseId));
+    
+    Lesson lesson = new Lesson();
+    lesson.setTitle(lessonDTO.getTitle());
+    lesson.setContent(lessonDTO.getContent());
+    lesson.setLessonOrder(lessonDTO.getLessonOrder());
+    lesson.setVideoUrl(lessonDTO.getVideoUrl());
+    lesson.setDuration(lessonDTO.getDuration());
+    lesson.setCourse(course);
+    
+    Lesson savedLesson = lessonRepository.save(lesson);
+    return convertToDTO(savedLesson);
+}
+
+@Override
+public LessonDTO updateLesson(Long lessonId, LessonDTO lessonDTO) {
+    Lesson lesson = lessonRepository.findById(lessonId)
+            .orElseThrow(() -> new ResourceNotFoundException("Lesson not found with id: " + lessonId));
+    
+    lesson.setTitle(lessonDTO.getTitle());
+    lesson.setContent(lessonDTO.getContent());
+    lesson.setLessonOrder(lessonDTO.getLessonOrder());
+    lesson.setVideoUrl(lessonDTO.getVideoUrl());
+    lesson.setDuration(lessonDTO.getDuration());
+    
+    Lesson updatedLesson = lessonRepository.save(lesson);
+    return convertToDTO(updatedLesson);
+}
+
+@Override
+public void deleteLesson(Long lessonId) {
+    Lesson lesson = lessonRepository.findById(lessonId)
+            .orElseThrow(() -> new ResourceNotFoundException("Lesson not found with id: " + lessonId));
+    lessonRepository.delete(lesson);
+}
     private CourseDTO convertToDTO(Course course) {
         CourseDTO dto = new CourseDTO();
         dto.setId(course.getId());

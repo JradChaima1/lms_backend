@@ -1,6 +1,16 @@
 package com.lms.lms_backend.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "lessons")
@@ -23,8 +33,8 @@ public class Lesson {
     @JoinColumn(name = "course_id")
     private Course course;
     
-    @OneToOne(mappedBy = "lesson", cascade = CascadeType.ALL)
-    private Quiz quiz;
+    @OneToMany(mappedBy = "lesson", cascade = CascadeType.ALL)
+    private java.util.List<Quiz> quizzes;
     
   
     public Lesson() {}
@@ -59,6 +69,17 @@ public class Lesson {
     public Course getCourse() { return course; }
     public void setCourse(Course course) { this.course = course; }
     
-    public Quiz getQuiz() { return quiz; }
-    public void setQuiz(Quiz quiz) { this.quiz = quiz; }
+    public java.util.List<Quiz> getQuizzes() { return quizzes; }
+    public void setQuizzes(java.util.List<Quiz> quizzes) { this.quizzes = quizzes; }
+    
+    // Helper method to get the template quiz (quiz without user)
+    public Quiz getQuiz() { 
+        if (quizzes != null && !quizzes.isEmpty()) {
+            return quizzes.stream()
+                .filter(q -> q.getUser() == null)
+                .findFirst()
+                .orElse(null);
+        }
+        return null;
+    }
 }
