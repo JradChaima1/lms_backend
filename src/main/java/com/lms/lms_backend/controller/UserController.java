@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.lms.lms_backend.dto.CourseDTO;
 import com.lms.lms_backend.dto.ProgressDTO;
 import com.lms.lms_backend.dto.UserDTO;
 import com.lms.lms_backend.service.UserService;
@@ -19,7 +20,8 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/users")
+
 @Tag(name = "User Management", description = "APIs for user operations and progress tracking")
 public class UserController {
 
@@ -49,17 +51,28 @@ public class UserController {
         List<ProgressDTO> progress = userService.getMyProgress();
         return ResponseEntity.ok(progress);
     }
-
     @PostMapping("/me/enrollments/{courseId}")
     @Operation(
-        summary = "Enroll in course", 
-        description = "Enroll the currently authenticated user in a specific course",
-        security = @SecurityRequirement(name = "bearerAuth")  // ← ADD THIS LINE
-    )
-    public ResponseEntity<Void> enrollInCourse(@PathVariable Long courseId) {
-        userService.enrollInCourse(courseId);
-        return ResponseEntity.ok().build();
-    }
+    summary = "Enroll in course", 
+    description = "Enroll the currently authenticated user in a specific course",
+    security = @SecurityRequirement(name = "bearerAuth")
+)
+public ResponseEntity<Void> enrollInCourse(@PathVariable Long courseId) {
+    userService.enrollInCourse(courseId);
+    return ResponseEntity.ok().build();
+}
+
+@GetMapping("/me/courses")
+@Operation(
+    summary = "Get my enrolled courses", 
+    description = "Retrieve all courses the currently authenticated user is enrolled in",
+    security = @SecurityRequirement(name = "bearerAuth")
+)
+public ResponseEntity<List<CourseDTO>> getMyEnrolledCourses() {
+    List<CourseDTO> courses = userService.getMyEnrolledCourses();
+    return ResponseEntity.ok(courses);
+}
+
 
     // ==================== ADMIN ENDPOINTS (KEPT FOR BACKWARDS COMPATIBILITY) ====================
     

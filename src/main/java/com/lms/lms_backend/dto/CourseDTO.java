@@ -9,6 +9,8 @@ public class CourseDTO {
     private Integer duration;
     private Integer lessonCount;
     private Integer enrollmentCount;
+    private Boolean enrolled;
+
     
 
     public CourseDTO() {}
@@ -46,4 +48,8 @@ public class CourseDTO {
     
     public Integer getEnrollmentCount() { return enrollmentCount; }
     public void setEnrollmentCount(Integer enrollmentCount) { this.enrollmentCount = enrollmentCount; }
+
+    public Boolean getEnrolled() { return enrolled; }
+    public void setEnrolled(Boolean enrolled) { this.enrolled = enrolled; }
+
 }

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.lms.lms_backend.dto.CourseDTO;
 import com.lms.lms_backend.dto.LessonDTO;
+import com.lms.lms_backend.dto.UserDTO;
 import com.lms.lms_backend.entity.Course;
 import com.lms.lms_backend.entity.Lesson;
 import com.lms.lms_backend.exception.ResourceNotFoundException;
@@ -15,6 +16,7 @@ import com.lms.lms_backend.repository.CourseRepository;
 import com.lms.lms_backend.repository.EnrollmentRepository;
 import com.lms.lms_backend.repository.LessonRepository;
 import com.lms.lms_backend.service.CourseService;
+import com.lms.lms_backend.service.UserService;
 
 @Service
 public class CourseServiceImpl implements CourseService {
@@ -27,6 +29,8 @@ public class CourseServiceImpl implements CourseService {
 
     @Autowired
     private EnrollmentRepository enrollmentRepository;
+    @Autowired
+    private UserService userService;
 
     @Override
     public List<CourseDTO> getAllCourses() {
@@ -139,18 +143,30 @@ public void deleteLesson(Long lessonId) {
             .orElseThrow(() -> new ResourceNotFoundException("Lesson not found with id: " + lessonId));
     lessonRepository.delete(lesson);
 }
-    private CourseDTO convertToDTO(Course course) {
-        CourseDTO dto = new CourseDTO();
-        dto.setId(course.getId());
-        dto.setTitle(course.getTitle());
-        dto.setDescription(course.getDescription());
-        dto.setCategory(course.getCategory());
-        dto.setDifficulty(course.getDifficulty());
-        dto.setDuration(course.getDuration());
-        dto.setLessonCount(course.getLessons().size());
-        dto.setEnrollmentCount(enrollmentRepository.countByCourseId(course.getId()));
-        return dto;
+private CourseDTO convertToDTO(Course course) {
+    CourseDTO dto = new CourseDTO();
+    dto.setId(course.getId());
+    dto.setTitle(course.getTitle());
+    dto.setDescription(course.getDescription());
+    dto.setCategory(course.getCategory());
+    dto.setDifficulty(course.getDifficulty());
+    dto.setDuration(course.getDuration());
+    dto.setLessonCount(course.getLessons().size());
+    dto.setEnrollmentCount(enrollmentRepository.countByCourseId(course.getId()));
+    
+    try {
+        UserDTO currentUser = userService.getCurrentUser();
+        boolean isEnrolled = enrollmentRepository.findByUserIdAndCourseId(
+            currentUser.getId(), 
+            course.getId()
+        ).isPresent();
+        dto.setEnrolled(isEnrolled);
+    } catch (Exception e) {
+        dto.setEnrolled(false);
     }
+    
+    return dto;
+}
 
     private LessonDTO convertToDTO(Lesson lesson) {
         LessonDTO dto = new LessonDTO();

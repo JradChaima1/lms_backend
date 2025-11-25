@@ -4,11 +4,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.lms.lms_backend.dto.CourseDTO;
 import com.lms.lms_backend.dto.LoginRequest;
 import com.lms.lms_backend.dto.ProgressDTO;
 import com.lms.lms_backend.dto.RegistrationRequest;
@@ -22,7 +24,9 @@ import com.lms.lms_backend.repository.CourseRepository;
 import com.lms.lms_backend.repository.EnrollmentRepository;
 import com.lms.lms_backend.repository.QuizRepository;
 import com.lms.lms_backend.repository.UserRepository;
+import com.lms.lms_backend.service.CourseService;
 import com.lms.lms_backend.service.UserService;
+
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -41,6 +45,10 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+    @Autowired
+    @Lazy
+    private CourseService courseService;
+
 
     @Override
     public UserDTO registerUser(RegistrationRequest registrationRequest) {
@@ -161,6 +169,17 @@ public class UserServiceImpl implements UserService {
         UserDTO currentUser = getCurrentUser();
         enrollInCourse(currentUser.getId(), courseId);
     }
+    
+
+    @Override
+    public List<CourseDTO> getMyEnrolledCourses() {
+    UserDTO currentUser = getCurrentUser();
+    List<Enrollment> enrollments = enrollmentRepository.findByUserId(currentUser.getId());
+    
+    return enrollments.stream()
+            .map(enrollment -> courseService.getCourseById(enrollment.getCourse().getId()))
+            .collect(Collectors.toList());
+}
 
     private UserDTO convertToDTO(User user) {
         UserDTO dto = new UserDTO();
