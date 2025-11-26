@@ -10,6 +10,8 @@ public class CourseDTO {
     private Integer lessonCount;
     private Integer enrollmentCount;
     private Boolean enrolled;
+    private Double progress;
+
 
     
 
@@ -48,6 +50,9 @@ public class CourseDTO {
     
     public Integer getEnrollmentCount() { return enrollmentCount; }
     public void setEnrollmentCount(Integer enrollmentCount) { this.enrollmentCount = enrollmentCount; }
+    
+    public Double getProgress() { return progress; }
+     public void setProgress(Double progress) { this.progress = progress; }
 
     public Boolean getEnrolled() { return enrolled; }
     public void setEnrolled(Boolean enrolled) { this.enrolled = enrolled; }

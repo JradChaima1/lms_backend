@@ -1,13 +1,24 @@
 package com.lms.lms_backend.config;
 
-import com.lms.lms_backend.entity.*;
-import com.lms.lms_backend.repository.*;
+import java.util.Arrays;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
+import com.lms.lms_backend.entity.Achievement;
+import com.lms.lms_backend.entity.Course;
+import com.lms.lms_backend.entity.Lesson;
+import com.lms.lms_backend.entity.Question;
+import com.lms.lms_backend.entity.Quiz;
+import com.lms.lms_backend.entity.User;
+import com.lms.lms_backend.repository.AchievementRepository;
+import com.lms.lms_backend.repository.CourseRepository;
+import com.lms.lms_backend.repository.LessonRepository;
+import com.lms.lms_backend.repository.QuestionRepository;
+import com.lms.lms_backend.repository.QuizRepository;
+import com.lms.lms_backend.repository.UserRepository;
 
 @Component
 public class DataInitializer implements CommandLineRunner {
@@ -29,14 +40,19 @@ public class DataInitializer implements CommandLineRunner {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+    
+    @Autowired
+    private AchievementRepository achievementRepository;
+
 
     @Override
     public void run(String... args) throws Exception {
         initializeSampleData();
+        initializeAchievements();
     }
 
     private void initializeSampleData() {
-        // Create sample users
+        
         if (userRepository.count() == 0) {
             User student = new User("John Doe", "john@student.com", 
                 passwordEncoder.encode("password123"), "STUDENT");
@@ -46,7 +62,7 @@ public class DataInitializer implements CommandLineRunner {
             userRepository.saveAll(Arrays.asList(student, instructor));
         }
 
-        // Create sample courses
+        
         if (courseRepository.count() == 0) {
             Course javaCourse = new Course(
                 "Java Programming Fundamentals",
@@ -66,7 +82,7 @@ public class DataInitializer implements CommandLineRunner {
 
             courseRepository.saveAll(Arrays.asList(javaCourse, springCourse));
 
-            // Create lessons for Java course
+            
             Lesson javaLesson1 = new Lesson(
                 "Introduction to Java",
                 "Java is a high-level, class-based, object-oriented programming language...",
@@ -87,13 +103,12 @@ public class DataInitializer implements CommandLineRunner {
 
             lessonRepository.saveAll(Arrays.asList(javaLesson1, javaLesson2));
 
-            // Create quiz for first lesson
+            
             Quiz javaQuiz1 = new Quiz("Java Basics Assessment", 0, 3);
             javaQuiz1.setLesson(javaLesson1);
 
             quizRepository.save(javaQuiz1);
 
-            // Create questions for quiz
             Question question1 = new Question(
                 "What is the main purpose of Java?",
                 "Game Development",
@@ -116,5 +131,126 @@ public class DataInitializer implements CommandLineRunner {
 
             questionRepository.saveAll(Arrays.asList(question1, question2));
         }
+        
     }
+    private void initializeAchievements() {
+    if (achievementRepository.count() > 0) {
+        return; 
+    }
+
+    
+    achievementRepository.save(new Achievement(
+        "First Steps",
+        "Enroll in your first course",
+        "🥇",
+        "COURSE",
+        1,
+        10
+    ));
+
+    achievementRepository.save(new Achievement(
+        "Knowledge Seeker",
+        "Enroll in 3 courses",
+        "📚",
+        "COURSE",
+        3,
+        25
+    ));
+
+    achievementRepository.save(new Achievement(
+        "Learning Enthusiast",
+        "Enroll in 5 courses",
+        "🎓",
+        "COURSE",
+        5,
+        50
+    ));
+
+   
+    achievementRepository.save(new Achievement(
+        "Quiz Beginner",
+        "Complete your first quiz",
+        "📝",
+        "QUIZ",
+        1,
+        10
+    ));
+
+    achievementRepository.save(new Achievement(
+        "Quiz Master",
+        "Complete 5 quizzes",
+        "🏆",
+        "QUIZ",
+        5,
+        30
+    ));
+
+    achievementRepository.save(new Achievement(
+        "Quiz Legend",
+        "Complete 10 quizzes",
+        "👑",
+        "QUIZ",
+        10,
+        50
+    ));
+
+    
+    achievementRepository.save(new Achievement(
+        "Perfect Score",
+        "Get 100% on a quiz",
+        "⭐",
+        "PERFECT",
+        1,
+        20
+    ));
+
+    achievementRepository.save(new Achievement(
+        "Perfectionist",
+        "Get 100% on 3 quizzes",
+        "🌟",
+        "PERFECT",
+        3,
+        40
+    ));
+
+    achievementRepository.save(new Achievement(
+        "Flawless Victory",
+        "Get 100% on 5 quizzes",
+        "💎",
+        "PERFECT",
+        5,
+        75
+    ));
+
+    
+    achievementRepository.save(new Achievement(
+        "Course Completer",
+        "Complete your first course",
+        "✅",
+        "COMPLETED",
+        1,
+        30
+    ));
+
+    achievementRepository.save(new Achievement(
+        "Dedicated Learner",
+        "Complete 3 courses",
+        "🎯",
+        "COMPLETED",
+        3,
+        60
+    ));
+
+    achievementRepository.save(new Achievement(
+        "Master Scholar",
+        "Complete 5 courses",
+        "🔥",
+        "COMPLETED",
+        5,
+        100
+    ));
+
+    System.out.println("✅ Achievements initialized successfully!");
+}
+
 }

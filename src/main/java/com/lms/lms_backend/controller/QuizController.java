@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.lms.lms_backend.dto.QuestionDTO;
 import com.lms.lms_backend.dto.QuizDTO;
+import com.lms.lms_backend.dto.QuizResultDTO;
 import com.lms.lms_backend.dto.QuizSubmissionDTO;
 import com.lms.lms_backend.service.QuizService;
 
@@ -36,11 +37,13 @@ public class QuizController {
 
     @PostMapping("/{userId}/submit")
     @Operation(summary = "Submit quiz", description = "Submit quiz answers and get results")
-    public ResponseEntity<QuizDTO> submitQuiz(
+    public ResponseEntity<QuizResultDTO> submitQuiz(
+
             @PathVariable Long userId,
             @RequestBody QuizSubmissionDTO submission) {
         
-        QuizDTO result = quizService.submitQuiz(userId, submission);
+        QuizResultDTO result = quizService.submitQuiz(userId, submission);
+
         return ResponseEntity.ok(result);
     }
 

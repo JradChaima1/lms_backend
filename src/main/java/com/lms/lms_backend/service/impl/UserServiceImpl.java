@@ -24,8 +24,10 @@ import com.lms.lms_backend.repository.CourseRepository;
 import com.lms.lms_backend.repository.EnrollmentRepository;
 import com.lms.lms_backend.repository.QuizRepository;
 import com.lms.lms_backend.repository.UserRepository;
+import com.lms.lms_backend.service.AchievementService;
 import com.lms.lms_backend.service.CourseService;
 import com.lms.lms_backend.service.UserService;
+
 
 
 @Service
@@ -45,6 +47,11 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    @Lazy
+    private AchievementService achievementService;
+
     @Autowired
     @Lazy
     private CourseService courseService;
@@ -81,10 +88,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDTO getUserById(Long id) {
-        // Get current user to check permissions
+     
         UserDTO currentUser = getCurrentUser();
-        
-        // Security: Users can only access their own data unless they're ADMIN
+       
         if (!currentUser.getRole().equals("ADMIN") && !currentUser.getId().equals(id)) {
             throw new RuntimeException("Access denied: You can only access your own user data");
         }
@@ -96,7 +102,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDTO getCurrentUser() {
-        // Get the authenticated user's email from Spring Security context
+        
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String email;
         
@@ -114,10 +120,10 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<ProgressDTO> getUserProgress(Long userId) {
-        // Add security check here too
+       
         UserDTO currentUser = getCurrentUser();
         
-        // Security: Users can only access their own progress unless they're ADMIN
+
         if (!currentUser.getRole().equals("ADMIN") && !currentUser.getId().equals(userId)) {
             throw new RuntimeException("Access denied: You can only access your own progress data");
         }
@@ -134,17 +140,17 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<ProgressDTO> getMyProgress() {
-        // Get current user and return their progress
+        
         UserDTO currentUser = getCurrentUser();
         return getUserProgress(currentUser.getId());
     }
 
     @Override
     public void enrollInCourse(Long userId, Long courseId) {
-        // Add security check for admin-only functionality
+        
         UserDTO currentUser = getCurrentUser();
         
-        // Security: Only ADMIN can enroll other users, users can only enroll themselves
+        
         if (!currentUser.getRole().equals("ADMIN") && !currentUser.getId().equals(userId)) {
             throw new RuntimeException("Access denied: You can only enroll yourself in courses");
         }
@@ -161,11 +167,16 @@ public class UserServiceImpl implements UserService {
 
         Enrollment enrollment = new Enrollment(user, course);
         enrollmentRepository.save(enrollment);
+        try {
+        achievementService.checkAndUnlockAchievements(userId);
+        } catch (Exception e) {
+        System.err.println("Error checking achievements: " + e.getMessage());
+        }
     }
 
     @Override
     public void enrollInCourse(Long courseId) {
-        // Overloaded method for current user enrollment
+        
         UserDTO currentUser = getCurrentUser();
         enrollInCourse(currentUser.getId(), courseId);
     }
@@ -177,7 +188,12 @@ public class UserServiceImpl implements UserService {
     List<Enrollment> enrollments = enrollmentRepository.findByUserId(currentUser.getId());
     
     return enrollments.stream()
-            .map(enrollment -> courseService.getCourseById(enrollment.getCourse().getId()))
+            .map(enrollment -> 
+            {
+            CourseDTO courseDTO = courseService.getCourseById(enrollment.getCourse().getId());
+            courseDTO.setProgress(enrollment.getProgress());
+            return courseDTO;
+            })
             .collect(Collectors.toList());
 }
 

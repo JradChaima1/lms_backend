@@ -1,6 +1,7 @@
 package com.lms.lms_backend.service.impl;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -9,7 +10,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.lms.lms_backend.dto.QuestionDTO;
+import com.lms.lms_backend.dto.QuestionResultDTO;
 import com.lms.lms_backend.dto.QuizDTO;
+import com.lms.lms_backend.dto.QuizResultDTO;
 import com.lms.lms_backend.dto.QuizSubmissionDTO;
 import com.lms.lms_backend.dto.UserDTO;
 import com.lms.lms_backend.entity.Course;
@@ -24,9 +27,9 @@ import com.lms.lms_backend.repository.LessonRepository;
 import com.lms.lms_backend.repository.QuestionRepository;
 import com.lms.lms_backend.repository.QuizRepository;
 import com.lms.lms_backend.repository.UserRepository;
+import com.lms.lms_backend.service.AchievementService;
 import com.lms.lms_backend.service.QuizService;
 import com.lms.lms_backend.service.UserService;
-
 @Service
 @Transactional
 public class QuizServiceImpl implements QuizService {
@@ -47,18 +50,19 @@ public class QuizServiceImpl implements QuizService {
     private EnrollmentRepository enrollmentRepository;
     @Autowired
     private UserService userService; 
+    @Autowired
+    private AchievementService achievementService;
 
     @Override
     public QuizDTO getQuizByLessonId(Long lessonId) {
-        Quiz quiz = quizRepository.findByLessonId(lessonId)
+        Quiz quiz = quizRepository.findFirstByLessonId(lessonId)
+
                 .orElseThrow(() -> new ResourceNotFoundException("Quiz not found for lesson id: " + lessonId));
         
         return convertToDTO(quiz);
     }
-
-  @Override
-public QuizDTO submitQuiz(Long userId, QuizSubmissionDTO submission) {
-    // Security: Users can only submit quizzes for themselves unless they're ADMIN
+    @Override
+public QuizResultDTO submitQuiz(Long userId, QuizSubmissionDTO submission) {
     UserDTO currentUser = userService.getCurrentUser();
     if (!currentUser.getRole().equals("ADMIN") && !currentUser.getId().equals(userId)) {
         throw new RuntimeException("Access denied: You can only submit quizzes for yourself");
@@ -70,42 +74,77 @@ public QuizDTO submitQuiz(Long userId, QuizSubmissionDTO submission) {
     Lesson lesson = lessonRepository.findById(submission.getLessonId())
             .orElseThrow(() -> new ResourceNotFoundException("Lesson not found with id: " + submission.getLessonId()));
 
-    // Additional security: Check if user is enrolled in the course
     Course course = lesson.getCourse();
     boolean isEnrolled = enrollmentRepository.findByUserIdAndCourseId(userId, course.getId()).isPresent();
     if (!isEnrolled && !currentUser.getRole().equals("ADMIN")) {
         throw new RuntimeException("Access denied: You must be enrolled in the course to take quizzes");
     }
 
-    // Get the quiz for this lesson
-    Quiz quiz = quizRepository.findByLessonId(lesson.getId())
+    Quiz quiz = quizRepository.findFirstByLessonId(lesson.getId())
             .orElseThrow(() -> new ResourceNotFoundException("Quiz not found for lesson id: " + lesson.getId()));
 
-    // Create a new quiz attempt
+  
+    List<QuestionResultDTO> questionResults = new ArrayList<>();
+    int correctCount = 0;
+    
+    for (QuizSubmissionDTO.QuestionAnswerDTO answer : submission.getAnswers()) {
+        Question question = questionRepository.findById(answer.getQuestionId())
+                .orElseThrow(() -> new ResourceNotFoundException("Question not found with id: " + answer.getQuestionId()));
+        
+        boolean isCorrect = question.getCorrectAnswer().equals(answer.getSelectedAnswer());
+        if (isCorrect) {
+            correctCount++;
+        }
+        
+        
+        int userAnswerIndex = answer.getSelectedAnswer().charAt(0) - 'A';
+        int correctAnswerIndex = question.getCorrectAnswer().charAt(0) - 'A';
+        
+        QuestionResultDTO questionResult = new QuestionResultDTO();
+        questionResult.setQuestionId(question.getId());
+        questionResult.setQuestionText(question.getQuestionText());
+        questionResult.setUserAnswer(userAnswerIndex);
+        questionResult.setCorrectAnswer(correctAnswerIndex);
+        questionResult.setIsCorrect(isCorrect);
+        
+        questionResults.add(questionResult);
+    }
+    
+    int totalQuestions = quiz.getQuestions().size();
+    int scorePercentage = (correctCount * 100) / totalQuestions;
+    boolean passed = scorePercentage >= 70; // 70% passing score
+    
+  
     Quiz quizAttempt = new Quiz();
     quizAttempt.setTitle(quiz.getTitle());
     quizAttempt.setUser(user);
     quizAttempt.setLesson(lesson);
-    quizAttempt.setTotalQuestions(quiz.getQuestions().size());
+    quizAttempt.setTotalQuestions(totalQuestions);
+    quizAttempt.setScore(correctCount);
     quizAttempt.setAttemptedAt(LocalDateTime.now());
-
-    // Calculate score
-    int correctAnswers = calculateScore(quiz, submission);
-    quizAttempt.setScore(correctAnswers);
-
-    // Save quiz attempt
-    Quiz savedQuiz = quizRepository.save(quizAttempt);
-
-    // Update enrollment progress
+    quizRepository.save(quizAttempt);
+    
+ 
     updateUserProgress(userId, course.getId());
+    
 
-    return convertToDTO(savedQuiz);
+    QuizResultDTO result = new QuizResultDTO();
+    result.setScore(scorePercentage);
+    result.setTotalQuestions(totalQuestions);
+    result.setCorrectAnswers(correctCount);
+    result.setPassed(passed);
+    result.setAnswers(questionResults);
+    
+    achievementService.checkAndUnlockAchievements(userId);
+
+    return result;
 }
+
 
       @Override
     public List<QuizDTO> getUserQuizHistory(Long userId) {
-        // Security: Users can only access their own quiz history unless they're ADMIN
-        UserDTO currentUser = userService.getCurrentUser();  // ← Use UserService
+
+        UserDTO currentUser = userService.getCurrentUser();  
         if (!currentUser.getRole().equals("ADMIN") && !currentUser.getId().equals(userId)) {
             throw new RuntimeException("Access denied: You can only access your own quiz history");
         }
@@ -132,7 +171,7 @@ public QuizDTO createQuiz(Long lessonId, QuizDTO quizDTO) {
     
     Quiz quiz = new Quiz();
     quiz.setTitle(quizDTO.getTitle());
-    quiz.setTotalQuestions(0); // Start with 0 questions
+    quiz.setTotalQuestions(0); 
     quiz.setLesson(lesson);
     
     Quiz savedQuiz = quizRepository.save(quiz);
@@ -155,7 +194,7 @@ public QuestionDTO addQuestionToQuiz(Long quizId, QuestionDTO questionDTO) {
     
     Question savedQuestion = questionRepository.save(question);
     
-    // Update quiz question count
+  
     quiz.setTotalQuestions(quiz.getTotalQuestions() + 1);
     quizRepository.save(quiz);
     
@@ -171,7 +210,7 @@ private QuestionDTO convertToQuestionDTO(Question question) {
     dto.setOptionB(question.getOptionB());
     dto.setOptionC(question.getOptionC());
     dto.setOptionD(question.getOptionD());
-    dto.setCorrectAnswer(question.getCorrectAnswer()); // Only for admin
+    dto.setCorrectAnswer(question.getCorrectAnswer()); 
     return dto;
 }
 
@@ -182,7 +221,7 @@ private QuestionDTO convertToQuestionDTO(Question question) {
             Question question = questionRepository.findById(answer.getQuestionId())
                     .orElseThrow(() -> new ResourceNotFoundException("Question not found with id: " + answer.getQuestionId()));
 
-            // Check if answer is correct
+            
             if (question.getCorrectAnswer().equals(answer.getSelectedAnswer())) {
                 correctCount++;
             }
@@ -192,25 +231,30 @@ private QuestionDTO convertToQuestionDTO(Question question) {
     }
 
     private void updateUserProgress(Long userId, Long courseId) {
-        Enrollment enrollment = enrollmentRepository.findByUserIdAndCourseId(userId, courseId)
-                .orElseThrow(() -> new ResourceNotFoundException("Enrollment not found for user and course"));
+    Enrollment enrollment = enrollmentRepository.findByUserIdAndCourseId(userId, courseId)
+            .orElseThrow(() -> new ResourceNotFoundException("Enrollment not found for user and course"));
 
-        // Calculate new progress based on completed quizzes
-        Course course = enrollment.getCourse();
-        long totalQuizzes = course.getLessons().stream()
-                .filter(lesson -> lesson.getQuiz() != null)
-                .count();
-        
-        long completedQuizzes = quizRepository.findByUserIdAndLessonId(userId, null).stream()
-                .filter(quiz -> course.getLessons().contains(quiz.getLesson()))
-                .count();
+    Course course = enrollment.getCourse();
+    
+   
+    List<Lesson> lessonsWithQuizzes = course.getLessons().stream()
+            .filter(lesson -> lesson.getQuiz() != null)
+            .collect(Collectors.toList());
+    
+    long totalQuizzes = lessonsWithQuizzes.size();
+    
+  
+    long completedQuizzes = lessonsWithQuizzes.stream()
+            .filter(lesson -> !quizRepository.findByUserIdAndLessonId(userId, lesson.getId()).isEmpty())
+            .count();
 
-        double progress = totalQuizzes > 0 ? (double) completedQuizzes / totalQuizzes : 0;
-        enrollment.setProgress(progress);
-        enrollment.setCompleted(progress >= 1.0);
+    double progress = totalQuizzes > 0 ? ((double) completedQuizzes / totalQuizzes) * 100 : 0;
+    enrollment.setProgress(progress);
+    enrollment.setCompleted(progress >= 100.0);
 
-        enrollmentRepository.save(enrollment);
-    }
+    enrollmentRepository.save(enrollment);
+}
+
 
     private QuizDTO convertToDTO(Quiz quiz) {
         QuizDTO dto = new QuizDTO();
@@ -220,27 +264,45 @@ private QuestionDTO convertToQuestionDTO(Question question) {
         dto.setScore(quiz.getScore());
         dto.setTotalQuestions(quiz.getTotalQuestions());
         
-        // User can be null for template quizzes
+        
         if (quiz.getUser() != null) {
             dto.setUserId(quiz.getUser().getId());
         }
         
-        // Lesson should always exist
+        
         if (quiz.getLesson() != null) {
             dto.setLessonId(quiz.getLesson().getId());
+        }
+        
+        
+        if (quiz.getQuestions() != null && !quiz.getQuestions().isEmpty()) {
+            List<QuestionDTO> questionDTOs = quiz.getQuestions().stream()
+                    .map(this::convertToDTO)
+                    .collect(Collectors.toList());
+            dto.setQuestions(questionDTOs);
         }
         
         return dto;
     }
 
-    private QuestionDTO convertToDTO(Question question) {
-        QuestionDTO dto = new QuestionDTO();
-        dto.setId(question.getId());
-        dto.setQuestionText(question.getQuestionText());
-        dto.setOptionA(question.getOptionA());
-        dto.setOptionB(question.getOptionB());
-        dto.setOptionC(question.getOptionC());
-        dto.setOptionD(question.getOptionD());
-        return dto;
-    }
+ private QuestionDTO convertToDTO(Question question) {
+    QuestionDTO dto = new QuestionDTO();
+    dto.setId(question.getId());
+    dto.setQuestionText(question.getQuestionText());
+    dto.setOptionA(question.getOptionA());
+    dto.setOptionB(question.getOptionB());
+    dto.setOptionC(question.getOptionC());
+    dto.setOptionD(question.getOptionD());
+    
+   
+    List<String> options = new ArrayList<>();
+    options.add(question.getOptionA());
+    options.add(question.getOptionB());
+    options.add(question.getOptionC());
+    options.add(question.getOptionD());
+    dto.setOptions(options);
+    
+    return dto;
+}
+
 }

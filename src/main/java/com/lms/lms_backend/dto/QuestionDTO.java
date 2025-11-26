@@ -1,5 +1,7 @@
 package com.lms.lms_backend.dto;
 
+import java.util.List;
+
 public class QuestionDTO {
     private Long id;
     private String questionText;
@@ -10,7 +12,8 @@ public class QuestionDTO {
     private String correctAnswer;
     private String userAnswer;
     private boolean isCorrect;
-    
+    private List<String> options;
+
 
     
    
@@ -43,6 +46,9 @@ public class QuestionDTO {
     
     public String getOptionD() { return optionD; }
     public void setOptionD(String optionD) { this.optionD = optionD; }
+    public List<String> getOptions() { return options; }
+    public void setOptions(List<String> options) { this.options = options; }
+
     
     public String getCorrectAnswer() { return correctAnswer; }
     public void setCorrectAnswer(String correctAnswer) { this.correctAnswer = correctAnswer; }
@@ -53,3 +59,4 @@ public class QuestionDTO {
     public boolean isCorrect() { return isCorrect; }
     public void setCorrect(boolean correct) { isCorrect = correct; }
 }
+   
