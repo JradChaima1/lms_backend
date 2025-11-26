@@ -14,6 +14,7 @@ import com.lms.lms_backend.dto.CourseDTO;
 import com.lms.lms_backend.dto.LoginRequest;
 import com.lms.lms_backend.dto.ProgressDTO;
 import com.lms.lms_backend.dto.RegistrationRequest;
+import com.lms.lms_backend.dto.UpdateProfileDTO;
 import com.lms.lms_backend.dto.UserDTO;
 import com.lms.lms_backend.entity.Course;
 import com.lms.lms_backend.entity.Enrollment;
@@ -27,6 +28,7 @@ import com.lms.lms_backend.repository.UserRepository;
 import com.lms.lms_backend.service.AchievementService;
 import com.lms.lms_backend.service.CourseService;
 import com.lms.lms_backend.service.UserService;
+
 
 
 
@@ -196,6 +198,41 @@ public class UserServiceImpl implements UserService {
             })
             .collect(Collectors.toList());
 }
+@Override
+public UserDTO updateProfile(Long userId, UpdateProfileDTO updateProfileDTO) {
+    UserDTO currentUser = getCurrentUser();
+    
+    // Security: Users can only update their own profile unless they're ADMIN
+    if (!currentUser.getRole().equals("ADMIN") && !currentUser.getId().equals(userId)) {
+        throw new RuntimeException("Access denied: You can only update your own profile");
+    }
+    
+    User user = userRepository.findById(userId)
+            .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
+    
+    // Check if email is being changed and if it's already taken
+    if (updateProfileDTO.getEmail() != null && 
+        !updateProfileDTO.getEmail().equals(user.getEmail())) {
+        if (userRepository.existsByEmail(updateProfileDTO.getEmail())) {
+            throw new RuntimeException("Email already in use");
+        }
+        user.setEmail(updateProfileDTO.getEmail());
+    }
+    
+    // Update name if provided
+    if (updateProfileDTO.getName() != null && !updateProfileDTO.getName().trim().isEmpty()) {
+        user.setName(updateProfileDTO.getName());
+    }
+    
+    User updatedUser = userRepository.save(user);
+    return convertToDTO(updatedUser);
+}
+
+@Override
+public UserDTO updateMyProfile(UpdateProfileDTO updateProfileDTO) {
+    UserDTO currentUser = getCurrentUser();
+    return updateProfile(currentUser.getId(), updateProfileDTO);
+}
 
     private UserDTO convertToDTO(User user) {
         UserDTO dto = new UserDTO();
@@ -229,4 +266,6 @@ public class UserServiceImpl implements UserService {
                 .filter(lesson -> quizRepository.findByUserIdAndLessonId(user.getId(), lesson.getId()).size() > 0)
                 .count();
     }
+
+ 
 }

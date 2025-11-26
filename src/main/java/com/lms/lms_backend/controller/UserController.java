@@ -7,11 +7,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.lms.lms_backend.dto.CourseDTO;
 import com.lms.lms_backend.dto.ProgressDTO;
+import com.lms.lms_backend.dto.UpdateProfileDTO;
 import com.lms.lms_backend.dto.UserDTO;
 import com.lms.lms_backend.service.UserService;
 
@@ -97,7 +100,7 @@ public ResponseEntity<List<CourseDTO>> getMyEnrolledCourses() {
         List<ProgressDTO> progress = userService.getUserProgress(userId);
         return ResponseEntity.ok(progress);
     }
-
+    
     @PostMapping("/{userId}/enrollments/{courseId}")
     @Operation(
         summary = "Enroll user in course [ADMIN]", 
@@ -110,4 +113,32 @@ public ResponseEntity<List<CourseDTO>> getMyEnrolledCourses() {
         userService.enrollInCourse(userId, courseId);
         return ResponseEntity.ok().build();
     }
+
+
+
+
+    @PutMapping("/me")
+    @Operation(
+    summary = "Update my profile",
+    description = "Update profile information for the currently authenticated user",
+    security = @SecurityRequirement(name = "bearerAuth")
+    )
+    public ResponseEntity<UserDTO> updateMyProfile(@RequestBody UpdateProfileDTO updateProfileDTO) {
+    UserDTO user = userService.updateMyProfile(updateProfileDTO);
+    return ResponseEntity.ok(user);
+   }
+
+   @PutMapping("/{userId}")
+   @Operation(
+    summary = "Update user profile [ADMIN]",
+    description = "Update profile information for a specific user (Admin functionality)",
+    security = @SecurityRequirement(name = "bearerAuth")
+   )
+    public ResponseEntity<UserDTO> updateUserProfile(
+        @PathVariable Long userId,
+        @RequestBody UpdateProfileDTO updateProfileDTO) {
+    UserDTO user = userService.updateProfile(userId, updateProfileDTO);
+    return ResponseEntity.ok(user);
+}
+
 }

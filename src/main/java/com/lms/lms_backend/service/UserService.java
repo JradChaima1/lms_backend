@@ -6,6 +6,7 @@ import com.lms.lms_backend.dto.CourseDTO;
 import com.lms.lms_backend.dto.LoginRequest;
 import com.lms.lms_backend.dto.ProgressDTO;
 import com.lms.lms_backend.dto.RegistrationRequest;
+import com.lms.lms_backend.dto.UpdateProfileDTO;
 import com.lms.lms_backend.dto.UserDTO;
 
 public interface UserService {
@@ -18,5 +19,8 @@ public interface UserService {
     void enrollInCourse(Long userId, Long courseId);
     void enrollInCourse(Long courseId);
     List<CourseDTO> getMyEnrolledCourses();
+    UserDTO updateProfile(Long userId, UpdateProfileDTO updateProfileDTO);
+    UserDTO updateMyProfile(UpdateProfileDTO updateProfileDTO);
+
   
 }
