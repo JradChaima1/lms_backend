@@ -142,7 +142,7 @@ public class DataInitializer implements CommandLineRunner {
     achievementRepository.save(new Achievement(
         "First Steps",
         "Enroll in your first course",
-        "🥇",
+        "assets/achievements/myfirststep.png",
         "COURSE",
         1,
         10
@@ -151,7 +151,7 @@ public class DataInitializer implements CommandLineRunner {
     achievementRepository.save(new Achievement(
         "Knowledge Seeker",
         "Enroll in 3 courses",
-        "📚",
+        "assets/achievements/books2.png",
         "COURSE",
         3,
         25
@@ -160,7 +160,7 @@ public class DataInitializer implements CommandLineRunner {
     achievementRepository.save(new Achievement(
         "Learning Enthusiast",
         "Enroll in 5 courses",
-        "🎓",
+        "assets/achievements/learning.png",
         "COURSE",
         5,
         50
@@ -170,7 +170,7 @@ public class DataInitializer implements CommandLineRunner {
     achievementRepository.save(new Achievement(
         "Quiz Beginner",
         "Complete your first quiz",
-        "📝",
+        "assets/achievements/quiz.png",
         "QUIZ",
         1,
         10
@@ -179,7 +179,7 @@ public class DataInitializer implements CommandLineRunner {
     achievementRepository.save(new Achievement(
         "Quiz Master",
         "Complete 5 quizzes",
-        "🏆",
+        "assets/achievements/achievement.png",
         "QUIZ",
         5,
         30
@@ -188,7 +188,7 @@ public class DataInitializer implements CommandLineRunner {
     achievementRepository.save(new Achievement(
         "Quiz Legend",
         "Complete 10 quizzes",
-        "👑",
+        "assets/achievements/crown.png",
         "QUIZ",
         10,
         50
@@ -198,7 +198,7 @@ public class DataInitializer implements CommandLineRunner {
     achievementRepository.save(new Achievement(
         "Perfect Score",
         "Get 100% on a quiz",
-        "⭐",
+        "assets/achievements/start.png",
         "PERFECT",
         1,
         20
@@ -207,7 +207,7 @@ public class DataInitializer implements CommandLineRunner {
     achievementRepository.save(new Achievement(
         "Perfectionist",
         "Get 100% on 3 quizzes",
-        "🌟",
+        "assets/achievements/perfect.png",
         "PERFECT",
         3,
         40
@@ -216,7 +216,7 @@ public class DataInitializer implements CommandLineRunner {
     achievementRepository.save(new Achievement(
         "Flawless Victory",
         "Get 100% on 5 quizzes",
-        "💎",
+        "assets/achievements/diamond.png",
         "PERFECT",
         5,
         75
@@ -226,7 +226,7 @@ public class DataInitializer implements CommandLineRunner {
     achievementRepository.save(new Achievement(
         "Course Completer",
         "Complete your first course",
-        "✅",
+        "assets/achievements/completed2.png",
         "COMPLETED",
         1,
         30
@@ -235,7 +235,7 @@ public class DataInitializer implements CommandLineRunner {
     achievementRepository.save(new Achievement(
         "Dedicated Learner",
         "Complete 3 courses",
-        "🎯",
+        "assets/achievements/goal.png",
         "COMPLETED",
         3,
         60
@@ -244,7 +244,7 @@ public class DataInitializer implements CommandLineRunner {
     achievementRepository.save(new Achievement(
         "Master Scholar",
         "Complete 5 courses",
-        "🔥",
+        "assets/achievements/spaceship.jpg",
         "COMPLETED",
         5,
         100

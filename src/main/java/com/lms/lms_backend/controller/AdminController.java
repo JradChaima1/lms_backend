@@ -188,4 +188,17 @@ public class AdminController {
         adminService.deleteQuestion(questionId);
         return ResponseEntity.ok().build();
     }
+
+    @PutMapping("/quizzes/{quizId}")
+    @Operation(
+        summary = "Update quiz",
+        description = "Update quiz title",
+        security = @SecurityRequirement(name = "bearerAuth")
+    )
+    public ResponseEntity<QuizDTO> updateQuiz(
+            @PathVariable Long quizId,
+            @RequestBody QuizDTO quizDTO) {
+        QuizDTO quiz = adminService.updateQuiz(quizId, quizDTO);
+        return ResponseEntity.ok(quiz);
+    }
 }

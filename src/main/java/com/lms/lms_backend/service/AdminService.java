@@ -21,6 +21,7 @@ public interface AdminService {
     LessonDTO updateLesson(Long lessonId, LessonDTO lessonDTO);
     void deleteLesson(Long lessonId);
     QuizDTO createQuiz(Long lessonId, QuizDTO quizDTO);
+    QuizDTO updateQuiz(Long quizId, QuizDTO quizDTO);
     QuestionDTO addQuestion(Long quizId, QuestionDTO questionDTO);
     void deleteQuestion(Long questionId);
 }

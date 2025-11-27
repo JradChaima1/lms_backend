@@ -179,6 +179,17 @@ public QuizDTO createQuiz(Long lessonId, QuizDTO quizDTO) {
 }
 
 @Override
+public QuizDTO updateQuiz(Long quizId, QuizDTO quizDTO) {
+    Quiz quiz = quizRepository.findById(quizId)
+            .orElseThrow(() -> new ResourceNotFoundException("Quiz not found with id: " + quizId));
+    
+    quiz.setTitle(quizDTO.getTitle());
+    
+    Quiz updatedQuiz = quizRepository.save(quiz);
+    return convertToDTO(updatedQuiz);
+}
+
+@Override
 public QuestionDTO addQuestionToQuiz(Long quizId, QuestionDTO questionDTO) {
     Quiz quiz = quizRepository.findById(quizId)
             .orElseThrow(() -> new ResourceNotFoundException("Quiz not found with id: " + quizId));
@@ -293,6 +304,7 @@ private QuestionDTO convertToQuestionDTO(Question question) {
     dto.setOptionB(question.getOptionB());
     dto.setOptionC(question.getOptionC());
     dto.setOptionD(question.getOptionD());
+    dto.setCorrectAnswer(question.getCorrectAnswer());
     
    
     List<String> options = new ArrayList<>();

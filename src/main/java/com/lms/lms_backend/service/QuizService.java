@@ -13,5 +13,6 @@ public interface QuizService {
     List<QuizDTO> getUserQuizHistory(Long userId);
     List<QuestionDTO> getQuizQuestions(Long quizId);
     QuizDTO createQuiz(Long lessonId, QuizDTO quizDTO);
+    QuizDTO updateQuiz(Long quizId, QuizDTO quizDTO);
     QuestionDTO addQuestionToQuiz(Long quizId, QuestionDTO questionDTO);
 }

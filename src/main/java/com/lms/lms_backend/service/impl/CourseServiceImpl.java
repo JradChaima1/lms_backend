@@ -180,7 +180,10 @@ private CourseDTO convertToDTO(Course course) {
         dto.setVideoUrl(lesson.getVideoUrl());
         dto.setDuration(lesson.getDuration());
         dto.setCourseId(lesson.getCourse().getId());
-        dto.setHasQuiz(lesson.getQuiz() != null);
+        // Only show quiz if it exists AND has questions
+        dto.setHasQuiz(lesson.getQuiz() != null && 
+                       lesson.getQuiz().getQuestions() != null && 
+                       !lesson.getQuiz().getQuestions().isEmpty());
         return dto;
     }
 }

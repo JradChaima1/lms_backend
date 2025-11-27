@@ -167,6 +167,11 @@ public class AdminServiceImpl implements AdminService {
     }
 
     @Override
+    public QuizDTO updateQuiz(Long quizId, QuizDTO quizDTO) {
+        return quizService.updateQuiz(quizId, quizDTO);
+    }
+
+    @Override
     public QuestionDTO addQuestion(Long quizId, QuestionDTO questionDTO) {
         return quizService.addQuestionToQuiz(quizId, questionDTO);
     }
