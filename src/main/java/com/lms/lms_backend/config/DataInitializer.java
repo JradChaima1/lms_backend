@@ -54,15 +54,19 @@ public class DataInitializer implements CommandLineRunner {
     private void initializeSampleData() {
         
         if (userRepository.count() == 0) {
-            User admin = new User("Admin User", "admin@lms.com", 
-                passwordEncoder.encode("admin123"), "ADMIN");
+            // Get admin credentials from environment variables
+            String adminEmail = System.getenv().getOrDefault("ADMIN_EMAIL", "admin@lms.com");
+            String adminPassword = System.getenv().getOrDefault("ADMIN_PASSWORD", "admin123");
+            
+            User admin = new User("Admin User", adminEmail, 
+                passwordEncoder.encode(adminPassword), "ADMIN");
             User student = new User("John Doe", "john@student.com", 
                 passwordEncoder.encode("password123"), "STUDENT");
             User instructor = new User("Jane Smith", "jane@instructor.com", 
                 passwordEncoder.encode("password123"), "INSTRUCTOR");
             
             userRepository.saveAll(Arrays.asList(admin, student, instructor));
-            System.out.println("✅ Default users created - Admin: admin@lms.com / admin123");
+            System.out.println("✅ Default users created - Admin email: " + adminEmail);
         }
 
         

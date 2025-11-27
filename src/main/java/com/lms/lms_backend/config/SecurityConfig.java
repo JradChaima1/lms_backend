@@ -65,6 +65,10 @@ public class SecurityConfig {
                 // Quiz endpoints - authenticated
                 .requestMatchers("/quizzes/**").authenticated()
                 
+                // Achievement endpoints - authenticated
+                .requestMatchers(HttpMethod.GET, "/achievements/me").authenticated()
+                .requestMatchers(HttpMethod.GET, "/achievements/**").authenticated()
+                
                 // AI endpoints - authenticated
                 .requestMatchers("/ai/**").authenticated()
                 
