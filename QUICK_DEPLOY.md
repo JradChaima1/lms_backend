@@ -1,42 +1,50 @@
 # Quick Render Deployment Steps
 
-## Method 1: Using Dockerfile (Recommended - Simpler)
+## Using Dockerfile (Recommended - Most Reliable)
 
-1. **Push to GitHub**
-   ```bash
-   git add .
-   git commit -m "Add Render deployment files"
-   git push
-   ```
+### Step 1: Push to GitHub
+```bash
+git add .
+git commit -m "Add Render deployment files"
+git push
+```
 
-2. **Create Web Service on Render**
-   - Go to https://dashboard.render.com/
-   - Click "New +" → "Web Service"
-   - Connect your GitHub repo
-   - Select branch: `main`
-   - **Root Directory**: `lms-backend/lms-backend`
-   - Render will auto-detect the Dockerfile
+### Step 2: Create Web Service on Render
+1. Go to https://dashboard.render.com/
+2. Click "New +" → "Web Service"
+3. Connect your GitHub repository
+4. Select your repository and branch (usually `main`)
 
-3. **Set Environment Variables**
-   ```
-   SPRING_PROFILES_ACTIVE=prod
-   DATABASE_URL=jdbc:mysql://HOST:PORT/DATABASE?user=USER&password=PASS
-   JWT_SECRET=your-secret-key-min-32-chars
-   ```
+### Step 3: Configure Service
+- **Name**: lms-backend (or your preferred name)
+- **Region**: Choose closest to your users
+- **Branch**: main
+- **Root Directory**: `lms-backend/lms-backend`
+- **Environment**: Docker
+- Render will auto-detect the Dockerfile ✓
 
-4. **Deploy** - Click "Create Web Service"
+### Step 4: Set Environment Variables
+Click "Advanced" and add these environment variables:
 
-## Method 2: Using Build Script
+```
+SPRING_PROFILES_ACTIVE=prod
+DATABASE_URL=jdbc:mysql://HOST:PORT/DATABASE?user=USER&password=PASS
+JWT_SECRET=your-secret-key-min-32-chars
+```
 
-If Dockerfile doesn't work, use these settings:
+### Step 5: Deploy
+Click "Create Web Service" and wait for deployment to complete (5-10 minutes)
+
+---
+
+## Alternative: Using Maven Build (If Docker fails)
+
+### Configure these settings on Render:
 - **Runtime**: Java
-- **Build Command**: `./build.sh`
+- **Build Command**: `mvn clean install -DskipTests`
 - **Start Command**: `java -Dserver.port=$PORT -jar target/lms-backend-0.0.1-SNAPSHOT.jar`
 
-Before pushing, make build.sh executable:
-```bash
-git update-index --chmod=+x lms-backend/lms-backend/build.sh
-```
+Note: This requires `system.properties` file with `java.runtime.version=21`
 
 ## Required Environment Variables
 
