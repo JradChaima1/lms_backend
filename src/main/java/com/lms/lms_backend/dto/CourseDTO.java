@@ -11,6 +11,7 @@ public class CourseDTO {
     private Integer enrollmentCount;
     private Boolean enrolled;
     private Double progress;
+    private String imageUrl;
 
 
     
@@ -56,5 +57,8 @@ public class CourseDTO {
 
     public Boolean getEnrolled() { return enrolled; }
     public void setEnrolled(Boolean enrolled) { this.enrolled = enrolled; }
+    
+    public String getImageUrl() { return imageUrl; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
 
 }

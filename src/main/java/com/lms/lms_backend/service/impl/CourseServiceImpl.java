@@ -78,6 +78,7 @@ public CourseDTO createCourse(CourseDTO courseDTO) {
     course.setCategory(courseDTO.getCategory());
     course.setDifficulty(courseDTO.getDifficulty());
     course.setDuration(courseDTO.getDuration());
+    course.setImageUrl(courseDTO.getImageUrl());
     
     Course savedCourse = courseRepository.save(course);
     return convertToDTO(savedCourse);
@@ -93,6 +94,7 @@ public CourseDTO updateCourse(Long courseId, CourseDTO courseDTO) {
     course.setCategory(courseDTO.getCategory());
     course.setDifficulty(courseDTO.getDifficulty());
     course.setDuration(courseDTO.getDuration());
+    course.setImageUrl(courseDTO.getImageUrl());
     
     Course updatedCourse = courseRepository.save(course);
     return convertToDTO(updatedCourse);
@@ -151,6 +153,7 @@ private CourseDTO convertToDTO(Course course) {
     dto.setCategory(course.getCategory());
     dto.setDifficulty(course.getDifficulty());
     dto.setDuration(course.getDuration());
+    dto.setImageUrl(course.getImageUrl());
     dto.setLessonCount(course.getLessons().size());
     dto.setEnrollmentCount(enrollmentRepository.countByCourseId(course.getId()));
     

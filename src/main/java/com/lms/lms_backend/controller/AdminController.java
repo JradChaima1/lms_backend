@@ -85,6 +85,8 @@ public class AdminController {
         security = @SecurityRequirement(name = "bearerAuth")
     )
     public ResponseEntity<CourseDTO> createCourse(@RequestBody CourseDTO courseDTO) {
+        System.out.println("Received CourseDTO: " + courseDTO.getTitle());
+        System.out.println("ImageURL: " + courseDTO.getImageUrl());
         CourseDTO course = adminService.createCourse(courseDTO);
         return ResponseEntity.ok(course);
     }

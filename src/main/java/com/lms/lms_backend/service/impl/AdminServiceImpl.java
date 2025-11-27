@@ -206,6 +206,7 @@ public class AdminServiceImpl implements AdminService {
     dto.setCategory(course.getCategory());
     dto.setDifficulty(course.getDifficulty());
     dto.setDuration(course.getDuration());
+    dto.setImageUrl(course.getImageUrl());
  
     if (course.getLessons() != null) {
         dto.setLessonCount(course.getLessons().size());
@@ -220,6 +221,7 @@ private Course convertToEntity(CourseDTO dto) {
     course.setCategory(dto.getCategory());
     course.setDifficulty(dto.getDifficulty());
     course.setDuration(dto.getDuration());
+    course.setImageUrl(dto.getImageUrl());
     return course;
 }
 
@@ -229,6 +231,7 @@ private void updateEntityFromDTO(Course course, CourseDTO dto) {
     course.setCategory(dto.getCategory());
     course.setDifficulty(dto.getDifficulty());
     course.setDuration(dto.getDuration());
+    course.setImageUrl(dto.getImageUrl());
 }
 
 

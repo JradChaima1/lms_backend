@@ -38,6 +38,8 @@ public class SecurityConfig {
                 // Public endpoints
                 .requestMatchers("/auth/**").permitAll()
                 .requestMatchers("/courses/**").permitAll()
+                .requestMatchers("/uploads/**").permitAll()
+                .requestMatchers("/upload/**").permitAll()
                 .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/api-docs/**").permitAll()
                 
                 // Current user endpoints - any authenticated user
